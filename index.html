@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sranan Tongo Leren</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Nunito:wght@500;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --ink:#0d1a0f;
+  --forest:#1a3a1e;
+  --canopy:#2d5a34;
+  --leaf:#4a8c52;
+  --gold:#c8952a;
+  --gold-light:#e8b84b;
+  --cream:#f7f2e8;
+  --red:#8b1a1a;
+  --neon:#39FF14;
+}
+
+body{
+  background:var(--ink);
+  font-family:'Nunito',sans-serif;
+  font-weight:600;
+  color:var(--cream);
+  min-height:100vh;
+  padding-top:56px;
+  padding-bottom:84px;
+}
+
+.app{max-width:720px;margin:0 auto;}
+
+/* ─── TOP STATS BAR (Duolingo-stijl) ─── */
+.stats-bar{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  background:rgba(13,26,15,0.92);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(200,149,42,0.12);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px;gap:12px;
+  max-width:720px;margin:0 auto;
+}
+.stats-bar-inner{display:flex;gap:14px;align-items:center;}
+.stat{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;
+}
+.stat-icon{font-size:18px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));}
+.stat-streak .stat-value{color:#ff9533;}
+.stat-hearts .stat-value{color:#e85a5a;}
+.stat-gems .stat-value{color:var(--gold-light);}
+.stat-flash{animation:statBump 0.45s ease;}
+@keyframes statBump{0%{transform:scale(1);}40%{transform:scale(1.25);}100%{transform:scale(1);}}
+.stat-hearts.depleted .stat-value{color:rgba(247,242,232,0.35);}
+.stat-hearts.depleted .stat-icon{filter:grayscale(0.6) brightness(0.7);}
+
+/* ─── GAME OVER MODAL ─── */
+.game-over{
+  position:fixed;inset:0;z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(5,12,7,0.78);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  opacity:0;transition:opacity 0.4s ease;
+  padding:24px;
+}
+.game-over[hidden]{display:none;}
+.game-over.visible{opacity:1;}
+.game-over-card{
+  position:relative;
+  width:100%;max-width:340px;
+  background:linear-gradient(160deg,#3a1414 0%,#1a0808 100%);
+  border:2px solid var(--red);
+  border-radius:28px;
+  padding:36px 28px 28px;
+  text-align:center;
+  box-shadow:0 8px 0 0 #5a0f0f,0 24px 60px rgba(0,0,0,0.7);
+  transform:scale(0.72) translateY(20px);
+  transition:transform 0.45s cubic-bezier(.34,1.56,.64,1);
+}
+.game-over.visible .game-over-card{transform:scale(1) translateY(0);}
+.game-over-icon{
+  font-size:84px;line-height:1;margin-bottom:14px;
+  display:inline-block;
+  animation:heartBreak 0.85s cubic-bezier(.34,1.56,.64,1) 0.2s both;
+  filter:drop-shadow(0 4px 12px rgba(139,26,26,0.6));
+}
+@keyframes heartBreak{
+  0%{transform:scale(0.3) rotate(0);opacity:0;}
+  45%{transform:scale(1.35) rotate(-12deg);opacity:1;}
+  70%{transform:scale(0.95) rotate(8deg);}
+  100%{transform:scale(1) rotate(0);}
+}
+.game-over-title{
+  font-family:'Nunito',sans-serif;
+  font-size:38px;font-weight:900;
+  color:var(--cream);
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:8px;
+  text-shadow:0 2px 0 rgba(0,0,0,0.4);
+}
+.game-over-sub{
+  font-family:'Nunito',sans-serif;
+  font-size:14px;font-weight:600;
+  color:rgba(247,242,232,0.65);
+  margin-bottom:24px;
+}
+.game-over-stats{
+  display:flex;gap:14px;justify-content:center;
+  margin-bottom:26px;
+}
+.go-stat{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,0,0,0.3);
+  border:1px solid rgba(247,242,232,0.1);
+  border-radius:14px;
+  padding:10px 16px;
+}
+.go-stat-icon{font-size:20px;line-height:1;}
+.go-stat-value{font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;color:var(--gold-light);}
+.game-over .pill-btn{width:100%;background:var(--red);box-shadow:0 4px 0 0 #5a0f0f,inset 0 -2px 0 rgba(0,0,0,0.2);}
+.game-over .pill-btn:active{transform:translateY(3px);box-shadow:0 1px 0 0 #5a0f0f,inset 0 -2px 0 rgba(0,0,0,0.2);}
+.stats-lang{display:flex;gap:5px;}
+.lang-btn{
+  width:32px;height:32px;border:none;border-radius:50%;cursor:pointer;
+  background:transparent;
+  font-size:16px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0.45;transition:all 0.15s;
+}
+.lang-btn:hover{opacity:0.85;}
+.lang-btn.is-active{
+  opacity:1;
+  background:rgba(200,149,42,0.18);
+  box-shadow:0 0 0 2px var(--gold);
+}
+
+/* ─── BOTTOM NAV BAR (Duolingo-stijl) ─── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:60;
+  background:rgba(18,40,22,0.95);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(200,149,42,0.15);
+  display:flex;justify-content:space-around;align-items:stretch;
+  padding:6px 2px env(safe-area-inset-bottom,8px);
+  max-width:720px;margin:0 auto;
+}
+.bottom-nav-btn{
+  flex:1;background:none;border:none;cursor:pointer;
+  padding:8px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:rgba(247,242,232,0.4);
+  font-family:'Nunito',sans-serif;
+  transition:all 0.15s;
+  border-radius:12px;
+  position:relative;
+}
+.bottom-nav-btn .bn-icon{
+  font-size:24px;line-height:1;
+  filter:grayscale(0.55) brightness(0.85);
+  transition:all 0.2s;
+}
+.bottom-nav-btn .bn-label{
+  font-size:9px;font-weight:800;letter-spacing:0.5px;
+  text-transform:uppercase;
+}
+.bottom-nav-btn:hover{color:rgba(247,242,232,0.75);}
+.bottom-nav-btn:hover .bn-icon{filter:grayscale(0) brightness(1);transform:scale(1.08);}
+.bottom-nav-btn.is-active{color:var(--gold-light);}
+.bottom-nav-btn.is-active .bn-icon{
+  filter:grayscale(0) brightness(1.05) drop-shadow(0 2px 6px rgba(200,149,42,0.4));
+  transform:scale(1.15);
+}
+.bottom-nav-btn.is-active::after{
+  content:"";position:absolute;top:-6px;left:30%;right:30%;height:3px;
+  background:var(--gold);border-radius:0 0 4px 4px;
+}
+
+/* ─── DUOLINGO-STIJL 3D KNOPPEN ─── */
+.pill-btn{
+  position:relative;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 26px;
+  border:none;outline:none;cursor:pointer;
+  border-radius:16px;
+  font-family:'Nunito',sans-serif;
+  font-size:14px;font-weight:800;letter-spacing:1px;
+  text-transform:uppercase;
+  color:#fff;
+  background:var(--leaf);
+  box-shadow:0 4px 0 0 #3a7044,inset 0 -2px 0 rgba(0,0,0,0.18);
+  transition:transform 0.08s ease-out,box-shadow 0.08s ease-out,filter 0.15s;
+  user-select:none;
+}
+.pill-btn:hover{filter:brightness(1.08);}
+.pill-btn:active{
+  transform:translateY(3px);
+  box-shadow:0 1px 0 0 #3a7044,inset 0 -2px 0 rgba(0,0,0,0.18);
+}
+.pill-btn.is-active{
+  background:var(--gold);
+  color:#1a1a1a;
+  box-shadow:0 4px 0 0 #8c6620,inset 0 -2px 0 rgba(0,0,0,0.18);
+}
+.pill-btn-sm{
+  padding:10px 18px;font-size:12px;border-radius:14px;
+  background:transparent;
+  color:rgba(247,242,232,0.7);
+  box-shadow:0 0 0 2px rgba(247,242,232,0.18) inset,0 3px 0 0 rgba(0,0,0,0.4);
+}
+.pill-btn-sm:hover{
+  color:var(--cream);
+  box-shadow:0 0 0 2px rgba(247,242,232,0.35) inset,0 3px 0 0 rgba(0,0,0,0.4);
+  filter:none;
+}
+.pill-btn-sm.is-active{
+  background:var(--canopy);
+  color:var(--gold-light);
+  box-shadow:0 0 0 2px var(--gold) inset,0 3px 0 0 #102a14;
+}
+.pill-btn-sm:active{box-shadow:0 0 0 2px rgba(247,242,232,0.18) inset,0 1px 0 0 rgba(0,0,0,0.4);}
+.pill-btn-xs{
+  padding:7px 14px;font-size:11px;border-radius:999px;
+  background:transparent;
+  color:rgba(247,242,232,0.65);
+  box-shadow:0 0 0 2px rgba(247,242,232,0.18) inset,0 2px 0 0 rgba(0,0,0,0.35);
+  text-transform:none;letter-spacing:0.4px;font-weight:700;
+}
+.pill-btn-xs:hover{color:var(--cream);filter:none;box-shadow:0 0 0 2px rgba(247,242,232,0.4) inset,0 2px 0 0 rgba(0,0,0,0.35);}
+.pill-btn-xs.is-active{
+  background:rgba(200,149,42,0.18);
+  color:var(--gold-light);
+  box-shadow:0 0 0 2px var(--gold) inset,0 2px 0 0 #5a4310;
+}
+.pill-btn-xs:active{transform:translateY(1px);box-shadow:0 0 0 2px rgba(247,242,232,0.18) inset,0 1px 0 0 rgba(0,0,0,0.35);}
+.pill-btn-round{
+  width:52px;height:52px;padding:0;border-radius:50%;font-size:20px;
+  background:var(--canopy);color:var(--cream);
+  box-shadow:0 4px 0 0 #102a14,inset 0 -2px 0 rgba(0,0,0,0.2);
+}
+.pill-btn-round:hover{background:var(--leaf);filter:none;}
+.pill-btn-round:active{transform:translateY(3px);box-shadow:0 1px 0 0 #102a14,inset 0 -2px 0 rgba(0,0,0,0.2);}
+.pill-btn-icon{font-size:14px;opacity:0.95;}
+
+/* ─── LANG SWITCH ─── */
+/* ─── HERO ─── */
+.hero{position:relative;padding:28px 24px 24px;overflow:hidden;text-align:center;}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(74,140,82,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(200,149,42,0.10) 0%, transparent 60%),
+    var(--ink);
+}
+.hero-lines{
+  position:absolute;inset:0;pointer-events:none;opacity:0.06;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(74,140,82,0.8) 39px,rgba(74,140,82,0.8) 40px);
+}
+.hero-content{position:relative;z-index:2;}
+.hero-eyebrow{font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;opacity:0;animation:fadeUp 0.8s 0.1s forwards;}
+.hero-title{font-family:'Nunito',sans-serif;font-size:clamp(28px,5.5vw,42px);font-weight:900;line-height:1.1;color:var(--cream);margin-bottom:10px;opacity:0;animation:fadeUp 0.9s 0.25s forwards;letter-spacing:-0.5px;}
+.hero-title em{color:var(--gold-light);font-style:normal;font-family:'Playfair Display',serif;font-style:italic;}
+.hero-sub{font-family:'Nunito',sans-serif;font-size:14px;color:rgba(247,242,232,0.55);font-weight:600;opacity:0;animation:fadeUp 0.9s 0.4s forwards;margin-bottom:20px;}
+.flag-bar{display:flex;height:5px;border-radius:3px;overflow:hidden;width:120px;margin:0 auto 28px;opacity:0;animation:fadeUp 0.9s 0.5s forwards;}
+.flag-bar div:nth-child(1){background:var(--red);flex:2;}
+.flag-bar div:nth-child(2){background:var(--cream);flex:1;}
+.flag-bar div:nth-child(3){background:var(--canopy);flex:4;}
+.flag-bar div:nth-child(4){background:var(--cream);flex:1;}
+.flag-bar div:nth-child(5){background:var(--red);flex:2;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* ─── NAV ─── */
+.nav{display:none;}
+
+/* ─── SECTIONS ─── */
+.section{display:none;padding:0 20px 32px;}
+.section.active{display:block;}
+.scene-label{font-size:9px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:14px;}
+
+/* ─── FLASHCARD ─── */
+.fc-wrap{perspective:1200px;margin-bottom:22px;border-radius:24px;}
+.fc-card{
+  width:100%;height:280px;
+  position:relative;cursor:pointer;transform-style:preserve-3d;
+  transition:transform 0.65s cubic-bezier(.4,0,.2,1);
+}
+.fc-card.flipped{transform:rotateY(180deg);}
+.fc-face{
+  position:absolute;inset:0;border-radius:24px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border:2px solid rgba(247,242,232,0.08);
+  padding:24px;
+  overflow:hidden;
+  box-shadow:0 6px 0 0 rgba(0,0,0,0.35),0 1px 0 rgba(255,255,255,0.04) inset;
+}
+.fc-front{background:linear-gradient(160deg,#2d5a34 0%,#1a3a1e 100%);}
+.fc-back{background:linear-gradient(160deg,#6b1f1f 0%,#2a0a0a 100%);transform:rotateY(180deg);}
+.fc-no{position:absolute;top:14px;right:18px;font-size:9px;letter-spacing:2px;color:rgba(247,242,232,0.25);}
+.fc-cat{position:absolute;top:14px;left:18px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);opacity:0.6;}
+.fc-emoji{font-size:44px;margin-bottom:10px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));}
+.fc-srn{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--cream);letter-spacing:-0.5px;}
+.fc-hint{font-size:10px;color:rgba(247,242,232,0.3);letter-spacing:2px;margin-top:8px;}
+
+.fc-translations{display:flex;flex-direction:column;gap:14px;align-items:center;margin-top:6px;}
+.fc-trans-row{display:flex;align-items:baseline;gap:10px;}
+.fc-flag{font-size:14px;line-height:1;}
+.fc-lang{font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);opacity:0.65;min-width:34px;}
+.fc-trans-word{font-family:'Playfair Display',serif;font-size:24px;font-style:italic;color:var(--gold-light);line-height:1;}
+.fc-note{font-size:11px;color:rgba(247,242,232,0.4);margin-top:14px;max-width:280px;text-align:center;line-height:1.5;}
+
+.fc-ctrl{display:flex;align-items:center;justify-content:center;gap:14px;}
+.fc-ctr{font-size:11px;color:rgba(247,242,232,0.35);letter-spacing:2px;min-width:70px;text-align:center;}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+
+/* ─── MATCH ─── */
+.match-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+.m-card{
+  height:78px;border-radius:16px;
+  border:2px solid rgba(247,242,232,0.12);
+  background:rgba(26,58,30,0.4);
+  box-shadow:0 4px 0 0 rgba(0,0,0,0.3);
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all 0.12s;padding:8px;
+  color:rgba(247,242,232,0.85);
+}
+.m-card:hover{border-color:rgba(247,242,232,0.4);}
+.m-card:active{transform:translateY(2px);box-shadow:0 2px 0 0 rgba(0,0,0,0.3);}
+.m-card.srn{font-family:'Playfair Display',serif;font-size:15px;font-style:italic;color:var(--gold-light);}
+.m-card.sel{border-color:var(--gold);background:rgba(200,149,42,0.18);color:var(--gold-light);box-shadow:0 4px 0 0 #5a4310;}
+.m-card.ok{border-color:var(--leaf);background:rgba(74,140,82,0.25);color:#a8e0b0;pointer-events:none;box-shadow:0 4px 0 0 #2d5a34;}
+.m-card.wrong{border-color:var(--red);background:rgba(139,26,26,0.25);animation:shake 0.3s;box-shadow:0 4px 0 0 #5a0f0f;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.match-stat{font-size:10px;letter-spacing:2px;color:var(--gold);opacity:0.6;margin-bottom:12px;}
+.center-row{display:flex;justify-content:center;}
+
+/* ─── QUIZ ─── */
+.quiz-card{
+  border:2px solid rgba(247,242,232,0.08);
+  background:linear-gradient(160deg,rgba(45,90,52,0.3) 0%,rgba(26,58,30,0.5) 100%);
+  border-radius:24px;padding:32px 26px 24px;margin-bottom:22px;
+  box-shadow:0 6px 0 0 rgba(0,0,0,0.3);
+}
+.q-word{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;color:var(--cream);margin-bottom:6px;}
+.q-sub{font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:rgba(247,242,232,0.45);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px;}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.q-opt{
+  padding:16px 12px;border-radius:16px;
+  border:2px solid rgba(247,242,232,0.18);
+  background:transparent;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all 0.12s;
+  color:var(--cream);text-align:center;
+  box-shadow:0 4px 0 0 rgba(0,0,0,0.3);
+}
+.q-opt:hover{border-color:rgba(247,242,232,0.4);}
+.q-opt:active{transform:translateY(2px);box-shadow:0 2px 0 0 rgba(0,0,0,0.3);}
+.q-opt.correct{border-color:var(--leaf);background:rgba(74,140,82,0.3);color:#b8eac0;pointer-events:none;box-shadow:0 4px 0 0 #2d5a34;}
+.q-opt.wrong{border-color:var(--red);background:rgba(139,26,26,0.25);color:#f0a8a8;pointer-events:none;box-shadow:0 4px 0 0 #5a0f0f;}
+.q-opt.dis{pointer-events:none;opacity:0.35;}
+.q-fb{text-align:center;font-size:13px;margin-top:14px;min-height:20px;}
+.q-fb.good{color:var(--leaf);}
+.q-fb.bad{color:#e08080;}
+.q-dots{display:flex;gap:5px;justify-content:center;margin-bottom:16px;}
+.q-dot{width:8px;height:8px;border-radius:50%;background:rgba(247,242,232,0.1);}
+.q-dot.c{background:var(--leaf);}
+.q-dot.w{background:var(--red);}
+
+/* ─── LISTEN ─── */
+.listen-word{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;font-style:italic;color:var(--gold-light);text-align:center;margin-bottom:6px;}
+.listen-emoji-big{font-size:72px;display:block;text-align:center;margin-bottom:18px;}
+.listen-panel{
+  border:2px solid rgba(247,242,232,0.08);
+  background:linear-gradient(160deg,rgba(45,90,52,0.3) 0%,rgba(26,58,30,0.5) 100%);
+  border-radius:24px;padding:32px 22px 22px;text-align:center;margin-bottom:22px;
+  box-shadow:0 6px 0 0 rgba(0,0,0,0.3);
+}
+.c-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+.c-btn{
+  padding:22px 10px;border-radius:18px;
+  border:2px solid rgba(247,242,232,0.18);
+  background:rgba(26,58,30,0.3);
+  font-size:34px;cursor:pointer;transition:all 0.12s;text-align:center;
+  box-shadow:0 4px 0 0 rgba(0,0,0,0.3);
+}
+.c-btn span{display:block;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;letter-spacing:0.5px;color:rgba(247,242,232,0.7);margin-top:6px;}
+.c-btn:hover{border-color:rgba(247,242,232,0.4);}
+.c-btn:active{transform:translateY(2px);box-shadow:0 2px 0 0 rgba(0,0,0,0.3);}
+.c-btn.ok{border-color:var(--leaf);background:rgba(74,140,82,0.3);box-shadow:0 4px 0 0 #2d5a34;}
+.c-btn.no{border-color:var(--red);background:rgba(139,26,26,0.25);box-shadow:0 4px 0 0 #5a0f0f;}
+.listen-scr{text-align:center;font-size:11px;letter-spacing:3px;color:var(--gold);opacity:0.7;}
+
+/* ─── INVUL ─── */
+.invul-panel{
+  border:2px solid rgba(247,242,232,0.08);
+  background:linear-gradient(160deg,rgba(45,90,52,0.3) 0%,rgba(26,58,30,0.5) 100%);
+  border-radius:24px;padding:32px 22px 24px;margin-bottom:18px;
+  box-shadow:0 6px 0 0 rgba(0,0,0,0.3);
+}
+.invul-emoji{font-size:56px;display:block;text-align:center;margin-bottom:10px;}
+.invul-clue{font-family:'Playfair Display',serif;font-size:20px;font-style:italic;color:var(--gold-light);text-align:center;margin-bottom:6px;}
+.invul-ex{font-size:11px;color:rgba(247,242,232,0.25);text-align:center;margin-bottom:20px;letter-spacing:0.5px;}
+.blanks{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;}
+.blank{width:38px;height:46px;border-radius:8px;border:1px solid rgba(200,149,42,0.3);font-family:'Playfair Display',serif;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;color:var(--cream);background:rgba(26,58,30,0.3);}
+.blank:hover{border-color:var(--neon);box-shadow:0 0 8px rgba(57,255,20,0.2);}
+.blank.ok{border-color:var(--leaf);color:#9de0a5;background:rgba(74,140,82,0.1);}
+.blank.no{border-color:var(--red);color:#e08080;background:rgba(139,26,26,0.1);animation:shake 0.3s;}
+.bank{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:22px;}
+.tile{position:relative;width:40px;height:46px;border-radius:10px;border:none;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;background:linear-gradient(180deg,#2a2a2a 0%,#0a0a0a 55%,#000 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.22),inset 0 -1px 0 rgba(0,0,0,0.8),0 3px 8px rgba(0,0,0,0.45);transition:all 0.2s;}
+.tile::before{content:"";position:absolute;left:8%;right:8%;top:1px;height:35%;border-radius:10px 10px 6px 6px;background:linear-gradient(180deg,rgba(255,255,255,0.18) 0%,rgba(255,255,255,0) 100%);pointer-events:none;}
+.tile:hover{color:var(--neon);box-shadow:inset 0 1px 0 rgba(255,255,255,0.3),inset 0 -1px 0 rgba(0,0,0,0.8),0 0 0 1px rgba(57,255,20,0.5),0 0 16px rgba(57,255,20,0.45);}
+.tile.used{opacity:0.2;pointer-events:none;}
+.inv-ctrl{display:flex;gap:10px;justify-content:center;}
+.inv-fb{text-align:center;font-size:13px;margin-top:14px;min-height:20px;}
+.inv-fb.good{color:var(--leaf);}
+.inv-fb.bad{color:#e08080;}
+.inv-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.inv-badge{font-size:10px;letter-spacing:2px;text-transform:uppercase;border:1px solid rgba(200,149,42,0.3);padding:5px 12px;border-radius:999px;color:var(--gold);}
+.inv-progress{display:flex;gap:4px;justify-content:center;margin-bottom:16px;}
+.ip{width:8px;height:8px;border-radius:50%;background:rgba(247,242,232,0.1);}
+.ip.g{background:var(--leaf);}
+.ip.b{background:var(--red);}
+
+/* ─── TAAL-SPECIFIEKE WEERGAVE ─── */
+body.lang-nl [data-trans-lang="en"]{display:none !important;}
+body.lang-en [data-trans-lang="nl"]{display:none !important;}
+
+/* ─── AUDIO KNOP ─── */
+.fc-audio-btn{
+  margin-top:12px;width:38px;height:38px;border-radius:50%;
+  border:1px solid rgba(200,149,42,0.3);background:rgba(0,0,0,0.3);
+  cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
+  color:rgba(247,242,232,0.55);transition:all 0.2s;flex-shrink:0;
+}
+.fc-audio-btn:hover{border-color:var(--neon);color:var(--neon);box-shadow:0 0 10px rgba(57,255,20,0.3);}
+.fc-audio-btn.playing{border-color:var(--gold);color:var(--gold-light);animation:pulse 0.6s ease infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 6px rgba(200,149,42,0.3);}to{box-shadow:0 0 18px rgba(200,149,42,0.6);}}
+
+/* ─── LANDING ─── */
+.landing{
+  position:fixed;inset:0;z-index:200;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--ink);text-align:center;padding:32px;
+  transition:opacity 0.55s ease,transform 0.55s ease;
+}
+.landing.out{opacity:0;transform:scale(1.04);pointer-events:none;}
+.landing-eyebrow{font-size:10px;font-weight:500;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:18px;}
+.landing-title{font-family:'Playfair Display',serif;font-size:clamp(28px,6vw,48px);font-weight:900;color:var(--cream);line-height:1.1;margin-bottom:10px;}
+.landing-title em{color:var(--gold-light);font-style:italic;}
+.landing-flag-bar{display:flex;height:4px;border-radius:2px;overflow:hidden;width:80px;margin:0 auto 18px;}
+.landing-flag-bar div:nth-child(1){background:var(--red);flex:2;}
+.landing-flag-bar div:nth-child(2){background:var(--cream);flex:1;}
+.landing-flag-bar div:nth-child(3){background:var(--canopy);flex:4;}
+.landing-flag-bar div:nth-child(4){background:var(--cream);flex:1;}
+.landing-flag-bar div:nth-child(5){background:var(--red);flex:2;}
+.landing-sub{font-size:13px;color:rgba(247,242,232,0.45);font-weight:300;margin-bottom:48px;}
+.voice-grid{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;}
+.voice-card{
+  width:160px;padding:32px 16px 24px;
+  border:1px solid rgba(200,149,42,0.25);border-radius:20px;
+  background:rgba(26,58,30,0.3);cursor:pointer;
+  transition:all 0.25s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+}
+.voice-card:hover{
+  border-color:var(--gold);background:rgba(45,90,52,0.4);
+  box-shadow:0 0 28px rgba(200,149,42,0.2),0 8px 24px rgba(0,0,0,0.4);
+  transform:translateY(-3px);
+}
+.voice-icon{font-size:52px;line-height:1;}
+.voice-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--cream);}
+</style>
+</head>
+<body>
+
+<!-- TOP STATS BAR (Duolingo-stijl) -->
+<header class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="stat stat-streak">
+      <span class="stat-icon">🔥</span>
+      <span class="stat-value" id="streakValue">0</span>
+    </div>
+    <div class="stat stat-hearts">
+      <span class="stat-icon" id="heartsIcon">❤️</span>
+      <span class="stat-value" id="heartsValue">5</span>
+    </div>
+    <div class="stat stat-gems">
+      <span class="stat-icon">💎</span>
+      <span class="stat-value" id="gemsValue">0</span>
+    </div>
+  </div>
+  <div class="stats-lang">
+    <button class="lang-btn" data-lang="nl" title="Nederlands">🇳🇱</button>
+    <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
+  </div>
+</header>
+
+<div class="app">
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-lines"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Wortubuku fu Sranan Tongo</p>
+      <h1 class="hero-title"><span data-i18n="hero_title_1">Leer</span> <em>Sranan Tongo</em><br><span data-i18n="hero_title_2">op jouw ritme</span></h1>
+      <p class="hero-sub" data-i18n="hero_sub">Een interactief woordenboek om Sranan Tongo te ontdekken</p>
+      <div class="flag-bar"><div></div><div></div><div></div><div></div><div></div></div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="pill-btn pill-btn-sm is-active" data-tab="fc"><span data-i18n="tab_fc">Woordkaarten</span> <span class="pill-btn-icon">📚</span></button>
+    <button class="pill-btn pill-btn-sm" data-tab="match"><span data-i18n="tab_match">Koppelen</span> <span class="pill-btn-icon">🔗</span></button>
+    <button class="pill-btn pill-btn-sm" data-tab="quiz"><span data-i18n="tab_quiz">Quiz</span> <span class="pill-btn-icon">❓</span></button>
+    <button class="pill-btn pill-btn-sm" data-tab="listen"><span data-i18n="tab_listen">Plaatjes</span> <span class="pill-btn-icon">🖼️</span></button>
+    <button class="pill-btn pill-btn-sm" data-tab="invul"><span data-i18n="tab_invul">Invullen</span> <span class="pill-btn-icon">✏️</span></button>
+  </div>
+
+  <!-- FLASHCARDS -->
+  <div class="section active" id="section-fc">
+    <p class="scene-label" data-i18n="label_fc">— Woordkaarten</p>
+    <div class="pill-row">
+      <button class="pill-btn pill-btn-xs is-active" data-cat="alle" data-i18n="cat_alle">Alle</button>
+      <button class="pill-btn pill-btn-xs" data-cat="lichaam" data-i18n="cat_lichaam">Lichaam</button>
+      <button class="pill-btn pill-btn-xs" data-cat="dieren" data-i18n="cat_dieren">Dieren</button>
+      <button class="pill-btn pill-btn-xs" data-cat="natuur" data-i18n="cat_natuur">Natuur</button>
+      <button class="pill-btn pill-btn-xs" data-cat="kleuren" data-i18n="cat_kleuren">Kleuren</button>
+      <button class="pill-btn pill-btn-xs" data-cat="getallen" data-i18n="cat_getallen">Getallen</button>
+      <button class="pill-btn pill-btn-xs" data-cat="familie" data-i18n="cat_familie">Familie</button>
+      <button class="pill-btn pill-btn-xs" data-cat="dagelijks" data-i18n="cat_dagelijks">Dagelijks</button>
+    </div>
+    <div class="fc-wrap">
+      <div class="fc-card" id="fcCard">
+        <div class="fc-face fc-front">
+          <span class="fc-cat" id="fcCatL"></span>
+          <span class="fc-no" id="fcNo"></span>
+          <div class="fc-emoji" id="fcEmoji"></div>
+          <div class="fc-srn" id="fcSrn"></div>
+          <div class="fc-hint" data-i18n="flip_hint">tikken om te draaien</div>
+        </div>
+        <div class="fc-face fc-back">
+          <span class="fc-cat" id="fcCatLB"></span>
+          <div class="fc-emoji" id="fcEmojiB"></div>
+          <div class="fc-translations">
+            <div class="fc-trans-row" data-trans-lang="nl">
+              <span class="fc-flag">🇳🇱</span>
+              <span class="fc-lang">NL</span>
+              <span class="fc-trans-word" id="fcNl"></span>
+            </div>
+            <div class="fc-trans-row" data-trans-lang="en">
+              <span class="fc-flag">🇬🇧</span>
+              <span class="fc-lang">EN</span>
+              <span class="fc-trans-word" id="fcEn"></span>
+            </div>
+          </div>
+          <div class="fc-note" id="fcNote"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fc-ctrl">
+      <button class="pill-btn pill-btn-round" id="fcPrev">←</button>
+      <span class="fc-ctr" id="fcCtr">1 / 46</span>
+      <button class="pill-btn pill-btn-round" id="fcNext">→</button>
+    </div>
+  </div>
+
+  <!-- MATCH -->
+  <div class="section" id="section-match">
+    <p class="scene-label" data-i18n="label_match">— Koppelen</p>
+    <div class="match-stat" id="matchStat">GEVONDEN: 0 / 6</div>
+    <div class="match-grid" id="matchGrid"></div>
+    <div class="center-row">
+      <button class="pill-btn pill-btn-sm" id="newMatch"><span data-i18n="new_game">Nieuw spel</span> <span class="pill-btn-icon">🔄</span></button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="section" id="section-quiz">
+    <p class="scene-label" data-i18n="label_quiz">— Quiz</p>
+    <div class="q-dots" id="qDots"></div>
+    <div class="quiz-card">
+      <div class="q-word" id="qWord"></div>
+      <div class="q-sub" id="qSub" data-i18n="quiz_question">Wat is de Nederlandse vertaling?</div>
+      <div class="q-opts" id="qOpts"></div>
+      <div class="q-fb" id="qFb"></div>
+    </div>
+    <div class="center-row">
+      <button class="pill-btn pill-btn-sm" id="nextQ"><span data-i18n="next_q">Volgende vraag</span> <span class="pill-btn-icon">→</span></button>
+    </div>
+  </div>
+
+  <!-- LISTEN -->
+  <div class="section" id="section-listen">
+    <p class="scene-label" data-i18n="label_listen">— Raad het plaatje</p>
+    <div class="listen-panel">
+      <span class="listen-emoji-big" id="lEmoji">❓</span>
+      <div class="listen-word" id="lWord"></div>
+    </div>
+    <div class="c-grid" id="cGrid"></div>
+    <div class="listen-scr" id="lScr">SCORE: 0</div>
+  </div>
+
+  <!-- INVUL -->
+  <div class="section" id="section-invul">
+    <p class="scene-label" data-i18n="label_invul">— Invuloefening</p>
+    <div class="inv-hdr">
+      <span class="inv-badge" id="invBadge">Score: 0 / 10</span>
+      <span style="font-size:10px;letter-spacing:2px;color:rgba(247,242,232,0.25);" id="invRnd">1 van 10</span>
+    </div>
+    <div class="inv-progress" id="invProg"></div>
+    <div class="invul-panel">
+      <span class="invul-emoji" id="invEmoji"></span>
+      <div class="invul-clue" id="invClue"></div>
+      <div class="invul-ex" id="invEx"></div>
+      <div class="blanks" id="invBlanks"></div>
+      <div class="bank" id="invBank"></div>
+      <div class="inv-ctrl">
+        <button class="pill-btn pill-btn-sm" id="invReset"><span data-i18n="clear">Wissen</span> <span class="pill-btn-icon">↩</span></button>
+        <button class="pill-btn pill-btn-sm" id="invCheck"><span data-i18n="check">Controleer</span> <span class="pill-btn-icon">✓</span></button>
+      </div>
+      <div class="inv-fb" id="invFb"></div>
+    </div>
+    <div class="center-row">
+      <button class="pill-btn pill-btn-sm" id="invNext"><span data-i18n="next">Volgende</span> <span class="pill-btn-icon">→</span></button>
+    </div>
+  </div>
+
+
+</div>
+
+<!-- GAME OVER MODAL -->
+<div id="gameOver" class="game-over" hidden>
+  <div class="game-over-card">
+    <div class="game-over-icon">💔</div>
+    <h2 class="game-over-title" id="goTitle">Game Over</h2>
+    <p class="game-over-sub" id="goSub">Je hebt geen levens meer over.</p>
+    <div class="game-over-stats">
+      <div class="go-stat"><span class="go-stat-icon">🔥</span><span class="go-stat-value" id="goStreak">0</span></div>
+      <div class="go-stat"><span class="go-stat-icon">💎</span><span class="go-stat-value" id="goGems">0</span></div>
+    </div>
+    <button class="pill-btn" id="goBtn">Opnieuw proberen</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAVIGATION (Duolingo-stijl) -->
+<nav class="bottom-nav">
+  <button class="bottom-nav-btn is-active" data-tab="fc">
+    <span class="bn-icon">📚</span>
+    <span class="bn-label" data-i18n="tab_fc">Woordkaarten</span>
+  </button>
+  <button class="bottom-nav-btn" data-tab="match">
+    <span class="bn-icon">🔗</span>
+    <span class="bn-label" data-i18n="tab_match">Koppelen</span>
+  </button>
+  <button class="bottom-nav-btn" data-tab="quiz">
+    <span class="bn-icon">❓</span>
+    <span class="bn-label" data-i18n="tab_quiz">Quiz</span>
+  </button>
+  <button class="bottom-nav-btn" data-tab="listen">
+    <span class="bn-icon">🖼️</span>
+    <span class="bn-label" data-i18n="tab_listen">Plaatjes</span>
+  </button>
+  <button class="bottom-nav-btn" data-tab="invul">
+    <span class="bn-icon">✏️</span>
+    <span class="bn-label" data-i18n="tab_invul">Invullen</span>
+  </button>
+</nav>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// I18N — Nederlandse en Engelse interface
+// ═══════════════════════════════════════════════════════════════
+const I18N = {
+  nl: {
+    hero_title_1:'Leer', hero_title_2:'op jouw ritme',
+    hero_sub:'Een interactief woordenboek om Sranan Tongo te ontdekken',
+    tab_fc:'Woordkaarten', tab_match:'Koppelen', tab_quiz:'Quiz', tab_listen:'Plaatjes', tab_invul:'Invullen',
+    label_fc:'— Woordkaarten', label_match:'— Koppelen', label_quiz:'— Quiz',
+    label_listen:'— Raad het plaatje', label_invul:'— Invuloefening',
+    cat_alle:'Alle', cat_lichaam:'Lichaam', cat_dieren:'Dieren', cat_natuur:'Natuur',
+    cat_kleuren:'Kleuren', cat_getallen:'Getallen', cat_familie:'Familie', cat_dagelijks:'Dagelijks',
+    edit:'Bewerken', add_card:'+ Kaart', del_card:'− Verwijder', reset_btn:'↺ Reset',
+    edit_banner:'— Bewerkmodus actief — klik op de tekst om te wijzigen —',
+    flip_hint:'tikken om te draaien',
+    match_found:'GEVONDEN', new_game:'Nieuw spel',
+    quiz_question:'Wat is de Nederlandse vertaling?', next_q:'Volgende vraag',
+    quiz_correct:'Uitstekend!', quiz_wrong:'Het juiste antwoord',
+    game_over:'Game Over', game_over_sub:'Je hebt geen levens meer over.',
+    try_again:'Opnieuw proberen', stats_streak:'Streak', stats_gems:'Punten',
+    score:'SCORE', score_label:'Score', of:'van',
+    clear:'Wissen', check:'Controleer', next:'Volgende',
+    inv_correct:'Perfekt! Goed gedaan.', inv_wrong:'Het woord is',
+    confirm_del:'Deze kaart verwijderen?',
+    confirm_reset:'Alle wijzigingen verwijderen en standaard woordenlijst herstellen?',
+  },
+  en: {
+    hero_title_1:'Learn', hero_title_2:'at your own pace',
+    hero_sub:'An interactive dictionary to explore Sranan Tongo',
+    tab_fc:'Flashcards', tab_match:'Match', tab_quiz:'Quiz', tab_listen:'Pictures', tab_invul:'Fill in',
+    label_fc:'— Flashcards', label_match:'— Match', label_quiz:'— Quiz',
+    label_listen:'— Guess the picture', label_invul:'— Fill in the word',
+    cat_alle:'All', cat_lichaam:'Body', cat_dieren:'Animals', cat_natuur:'Nature',
+    cat_kleuren:'Colors', cat_getallen:'Numbers', cat_familie:'Family', cat_dagelijks:'Everyday',
+    edit:'Edit', add_card:'+ Card', del_card:'− Delete', reset_btn:'↺ Reset',
+    edit_banner:'— Edit mode active — click on the text to modify —',
+    flip_hint:'tap to flip',
+    match_found:'FOUND', new_game:'New game',
+    quiz_question:'What is the English translation?', next_q:'Next question',
+    quiz_correct:'Excellent!', quiz_wrong:'The correct answer',
+    game_over:'Game Over', game_over_sub:'You ran out of lives.',
+    try_again:'Try again', stats_streak:'Streak', stats_gems:'Points',
+    score:'SCORE', score_label:'Score', of:'of',
+    clear:'Clear', check:'Check', next:'Next',
+    inv_correct:'Perfect! Well done.', inv_wrong:'The word is',
+    confirm_del:'Delete this card?',
+    confirm_reset:'Reset all changes and restore the default word list?',
+  }
+};
+const LANG_KEY='srn_lang_v1';
+let lang;
+try{lang=localStorage.getItem(LANG_KEY)||'nl';}catch(e){lang='nl';}
+if(lang!=='nl'&&lang!=='en')lang='nl';
+function t(k){return (I18N[lang]&&I18N[lang][k])||k;}
+function targetWord(w){return lang==='en'?w.en:w.nl;}
+function targetNote(w){return lang==='en'?(w.note_en||''):(w.note_nl||w.note||'');}
+
+/* ─── GAMIFICATIE — streak + gems + hearts ─── */
+const STATS_KEY='srn_stats_v1';
+const MAX_HEARTS=5;
+let stats;
+try{stats=JSON.parse(localStorage.getItem(STATS_KEY)||'{}');}catch(e){stats={};}
+if(typeof stats.streak!=='number')stats.streak=0;
+if(typeof stats.gems!=='number')stats.gems=0;
+stats.hearts=MAX_HEARTS;
+let gameOverShown=false;
+function saveStats(){try{localStorage.setItem(STATS_KEY,JSON.stringify({streak:stats.streak,gems:stats.gems}));}catch(e){}}
+function renderStats(){
+  const sv=document.getElementById('streakValue');if(sv)sv.textContent=stats.streak;
+  const gv=document.getElementById('gemsValue');if(gv)gv.textContent=stats.gems;
+  const hv=document.getElementById('heartsValue');if(hv)hv.textContent=stats.hearts;
+  const hi=document.getElementById('heartsIcon');if(hi)hi.textContent=stats.hearts>0?'❤️':'💔';
+  const sb=document.querySelector('.stat-hearts');if(sb)sb.classList.toggle('depleted',stats.hearts===0);
+}
+function recordCorrect(){
+  if(gameOverShown)return;
+  stats.streak++;stats.gems++;saveStats();renderStats();
+  flashStat('stat-streak');flashStat('stat-gems');
+}
+function recordWrong(){
+  if(gameOverShown)return;
+  if(stats.streak>0)stats.streak=0;
+  if(stats.hearts>0)stats.hearts--;
+  saveStats();renderStats();
+  flashStat('stat-hearts');
+  if(stats.hearts===0){setTimeout(showGameOver,700);}
+}
+function flashStat(cls){
+  const el=document.querySelector('.'+cls);
+  if(!el)return;
+  el.classList.remove('stat-flash');void el.offsetWidth;
+  el.classList.add('stat-flash');
+}
+function showGameOver(){
+  if(gameOverShown)return;
+  gameOverShown=true;
+  const modal=document.getElementById('gameOver');
+  if(!modal)return;
+  document.getElementById('goTitle').textContent=t('game_over');
+  document.getElementById('goSub').textContent=t('game_over_sub');
+  document.getElementById('goBtn').textContent=t('try_again');
+  document.getElementById('goStreak').textContent=stats.streak;
+  document.getElementById('goGems').textContent=stats.gems;
+  modal.removeAttribute('hidden');
+  requestAnimationFrame(()=>modal.classList.add('visible'));
+}
+function hideGameOver(){
+  const modal=document.getElementById('gameOver');
+  if(!modal)return;
+  modal.classList.remove('visible');
+  setTimeout(()=>{modal.setAttribute('hidden','');gameOverShown=false;},400);
+  stats.hearts=MAX_HEARTS;
+  stats.streak=0;
+  saveStats();renderStats();
+  startMatch();genQuiz();renderListen();startInvul();
+}
+function applyI18n(){
+  document.documentElement.lang=lang;
+  document.body.classList.toggle('lang-nl',lang==='nl');
+  document.body.classList.toggle('lang-en',lang==='en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.getAttribute('data-i18n'));});
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('is-active',b.dataset.lang===lang));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WOORDENLIJST — pas hier woorden aan, voeg toe of verwijder
+// Velden: srn (Sranantongo) | nl (Nederlands) | en (Engels)
+//         emoji | cat (lichaam/dieren/natuur/kleuren/getallen/familie/dagelijks)
+//         note_nl / note_en (optionele voorbeeldzinnen)
+// ═══════════════════════════════════════════════════════════════
+const DEFAULT_WORDS = [
+  {srn:"Ai",nl:"Oog",en:"Eye",emoji:"👁️",cat:"lichaam",
+    note_nl:"A smoko meki mi ai lon watra — Mijn ogen gingen tranen van de rook.",
+    note_en:"A smoko meki mi ai lon watra — The smoke made my eyes water."},
+  {srn:"Mofo",nl:"Mond",en:"Mouth",emoji:"👄",cat:"lichaam",
+    note_nl:"Koti wan sma mofo — iemand in de rede vallen.",
+    note_en:"Koti wan sma mofo — to interrupt someone."},
+  {srn:"Han",nl:"Hand",en:"Hand",emoji:"✋",cat:"lichaam",
+    note_nl:"Gi mi yu han — Geef me je hand.",
+    note_en:"Gi mi yu han — Give me your hand."},
+  {srn:"Futu",nl:"Voet",en:"Foot",emoji:"🦶",cat:"lichaam",
+    note_nl:"Mi futu e ati — Mijn voet doet pijn.",
+    note_en:"Mi futu e ati — My foot hurts."},
+  {srn:"Ede",nl:"Hoofd",en:"Head",emoji:"🧠",cat:"lichaam",
+    note_nl:"Mi ede e ati — Mijn hoofd doet pijn.",
+    note_en:"Mi ede e ati — My head hurts."},
+  {srn:"Bere",nl:"Buik",en:"Belly",emoji:"🫃",cat:"lichaam",
+    note_nl:"Ber'ati — maagpijn (bere + ati).",
+    note_en:"Ber'ati — stomachache (bere + ati)."},
+  {srn:"Dagu",nl:"Hond",en:"Dog",emoji:"🐶",cat:"dieren",
+    note_nl:"A dagu e bari — De hond blaft.",
+    note_en:"A dagu e bari — The dog is barking."},
+  {srn:"Puspusi",nl:"Kat",en:"Cat",emoji:"🐱",cat:"dieren",
+    note_nl:"A puspusi e sribi — De kat slaapt.",
+    note_en:"A puspusi e sribi — The cat is sleeping."},
+  {srn:"Fowru",nl:"Vogel",en:"Bird",emoji:"🐦",cat:"dieren",
+    note_nl:"A fowru e singi — De vogel zingt.",
+    note_en:"A fowru e singi — The bird is singing."},
+  {srn:"Fisi",nl:"Vis",en:"Fish",emoji:"🐟",cat:"dieren",
+    note_nl:"Mi lobi nyan fisi — Ik eet graag vis.",
+    note_en:"Mi lobi nyan fisi — I love eating fish."},
+  {srn:"Aboma",nl:"Anaconda",en:"Anaconda",emoji:"🐍",cat:"dieren",
+    note_nl:"Eunectes murinus — ook bekend als watra-aboma.",
+    note_en:"Eunectes murinus — also known as watra-aboma."},
+  {srn:"Aka",nl:"Roofvogel",en:"Bird of prey",emoji:"🦅",cat:"dieren",
+    note_nl:"Elke soort roofvogel: havik, arend, valk.",
+    note_en:"Any bird of prey: hawk, eagle, falcon."},
+  {srn:"Watra",nl:"Water",en:"Water",emoji:"💧",cat:"natuur",
+    note_nl:"A watra e kowru — Het water is koud.",
+    note_en:"A watra e kowru — The water is cold."},
+  {srn:"Gron",nl:"Grond / aarde",en:"Ground / earth",emoji:"🌍",cat:"natuur",
+    note_nl:"A sani fala na gron — Het ding viel op de grond.",
+    note_en:"A sani fala na gron — The thing fell to the ground."},
+  {srn:"Bon",nl:"Boom",en:"Tree",emoji:"🌳",cat:"natuur",
+    note_nl:"A bon de groto moro mi — De boom is groter dan ik.",
+    note_en:"A bon de groto moro mi — The tree is bigger than me."},
+  {srn:"Alen",nl:"Regen",en:"Rain",emoji:"🌧️",cat:"natuur",
+    note_nl:"Yu mu tapu a fensre noso a alen o wai kon — sluit het raam anders waait de regen naar binnen.",
+    note_en:"Yu mu tapu a fensre noso a alen o wai kon — close the window or the rain will blow in."},
+  {srn:"Liba",nl:"Rivier",en:"River",emoji:"🏞️",cat:"natuur",
+    note_nl:"Fu abra a liba — de rivier oversteken.",
+    note_en:"Fu abra a liba — to cross the river."},
+  {srn:"Faya",nl:"Vuur",en:"Fire",emoji:"🔥",cat:"natuur",
+    note_nl:"Ant. kowru (koud).",
+    note_en:"Opp. kowru (cold)."},
+  {srn:"Redi",nl:"Rood",en:"Red",emoji:"🔴",cat:"kleuren",
+    note_nl:"A fowru de redi — De vogel is rood.",
+    note_en:"A fowru de redi — The bird is red."},
+  {srn:"Blaka",nl:"Zwart",en:"Black",emoji:"⚫",cat:"kleuren",
+    note_nl:"A neti de blaka — De nacht is donker.",
+    note_en:"A neti de blaka — The night is dark."},
+  {srn:"Witi",nl:"Wit",en:"White",emoji:"⚪",cat:"kleuren",
+    note_nl:"A oso de witi — Het huis is wit.",
+    note_en:"A oso de witi — The house is white."},
+  {srn:"Grun",nl:"Groen",en:"Green",emoji:"🟢",cat:"kleuren",
+    note_nl:"A bon de grun — De boom is groen.",
+    note_en:"A bon de grun — The tree is green."},
+  {srn:"Blaw",nl:"Blauw",en:"Blue",emoji:"🔵",cat:"kleuren",
+    note_nl:"A liba de blaw — De rivier is blauw.",
+    note_en:"A liba de blaw — The river is blue."},
+  {srn:"Geri",nl:"Geel",en:"Yellow",emoji:"🟡",cat:"kleuren",
+    note_nl:"Ant. blaka.",
+    note_en:"Opp. blaka."},
+  {srn:"Wan",nl:"Één",en:"One",emoji:"1️⃣",cat:"getallen",
+    note_nl:"Wan fisi na mi — Één vis voor mij.",
+    note_en:"Wan fisi na mi — One fish for me."},
+  {srn:"Tu",nl:"Twee",en:"Two",emoji:"2️⃣",cat:"getallen",
+    note_nl:"Mi abi tu dagu — Ik heb twee honden.",
+    note_en:"Mi abi tu dagu — I have two dogs."},
+  {srn:"Dri",nl:"Drie",en:"Three",emoji:"3️⃣",cat:"getallen",
+    note_nl:"Wi de dri sma — Wij zijn met drie.",
+    note_en:"Wi de dri sma — There are three of us."},
+  {srn:"Fo",nl:"Vier",en:"Four",emoji:"4️⃣",cat:"getallen",
+    note_nl:"A abi fo pikin — Hij heeft vier kinderen.",
+    note_en:"A abi fo pikin — He has four children."},
+  {srn:"Feifi",nl:"Vijf",en:"Five",emoji:"5️⃣",cat:"getallen",
+    note_nl:"Feifi bon de dya — Er staan vijf bomen hier.",
+    note_en:"Feifi bon de dya — There are five trees here."},
+  {srn:"Siksi",nl:"Zes",en:"Six",emoji:"6️⃣",cat:"getallen",
+    note_nl:"Mi abi siksi buku — Ik heb zes boeken.",
+    note_en:"Mi abi siksi buku — I have six books."},
+  {srn:"Seibi",nl:"Zeven",en:"Seven",emoji:"7️⃣",cat:"getallen",
+    note_nl:"Seibi dei na wan wiki — Zeven dagen in een week.",
+    note_en:"Seibi dei na wan wiki — Seven days in a week."},
+  {srn:"Aiti",nl:"Acht",en:"Eight",emoji:"8️⃣",cat:"getallen",
+    note_nl:"Mi e wroko aiti uru — Ik werk acht uur.",
+    note_en:"Mi e wroko aiti uru — I work eight hours."},
+  {srn:"Negi",nl:"Negen",en:"Nine",emoji:"9️⃣",cat:"getallen",
+    note_nl:"A abi negi yari — Hij is negen jaar.",
+    note_en:"A abi negi yari — He is nine years old."},
+  {srn:"Tenti",nl:"Tien",en:"Ten",emoji:"🔟",cat:"getallen",
+    note_nl:"Tenti fowru de na a bon — Tien vogels zitten in de boom.",
+    note_en:"Tenti fowru de na a bon — Ten birds are in the tree."},
+  {srn:"Mama",nl:"Moeder",en:"Mother",emoji:"👩",cat:"familie",
+    note_nl:"M'ma — verkorte vorm.",
+    note_en:"M'ma — shortened form."},
+  {srn:"Papa",nl:"Papa",en:"Dad",emoji:"👨",cat:"familie",
+    note_nl:"Mi papa e wroko — Mijn papa werkt.",
+    note_en:"Mi papa e wroko — My dad is working."},
+  {srn:"Pikin",nl:"Kind",en:"Child",emoji:"👧",cat:"familie",
+    note_nl:"Ala pikin fu fo yari abi fu go na skoro — Alle kinderen van vier jaar moeten naar school.",
+    note_en:"Ala pikin fu fo yari abi fu go na skoro — All children from age four must go to school."},
+  {srn:"Brada",nl:"Broer",en:"Brother",emoji:"👦",cat:"familie",
+    note_nl:"Mi brada e kon tumoro — Mijn broer komt morgen.",
+    note_en:"Mi brada e kon tumoro — My brother is coming tomorrow."},
+  {srn:"Sisa",nl:"Zus",en:"Sister",emoji:"👩",cat:"familie",
+    note_nl:"Mi sisa de na skoro — Mijn zus is op school.",
+    note_en:"Mi sisa de na skoro — My sister is at school."},
+  {srn:"Nyanyan",nl:"Eten",en:"Food",emoji:"🍚",cat:"dagelijks",
+    note_nl:"Te yu e nyan, yu no mus taktaki — Als je eet, moet je niet praten.",
+    note_en:"Te yu e nyan, yu no mus taktaki — When you eat, you must not talk."},
+  {srn:"Dringi",nl:"Drinken",en:"Drink",emoji:"🥤",cat:"dagelijks",
+    note_nl:"Mi wani dringi watra — Ik wil water drinken.",
+    note_en:"Mi wani dringi watra — I want to drink water."},
+  {srn:"Sribi",nl:"Slapen",en:"Sleep",emoji:"😴",cat:"dagelijks",
+    note_nl:"A pikin e sribi — Het kind slaapt.",
+    note_en:"A pikin e sribi — The child is sleeping."},
+  {srn:"Go",nl:"Gaan",en:"Go",emoji:"🚶",cat:"dagelijks",
+    note_nl:"Mi e go na marki — Ik ga naar de markt.",
+    note_en:"Mi e go na marki — I am going to the market."},
+  {srn:"Kon",nl:"Komen",en:"Come",emoji:"🙋",cat:"dagelijks",
+    note_nl:"Mi e meki ala muiti fu kon na yu — Ik doe alle moeite om bij je te komen.",
+    note_en:"Mi e meki ala muiti fu kon na yu — I make every effort to come to you."},
+  {srn:"Abi",nl:"Hebben",en:"Have",emoji:"🤲",cat:"dagelijks",
+    note_nl:"Abi prisiri — plezier hebben.",
+    note_en:"Abi prisiri — to have fun."},
+  {srn:"Arki",nl:"Luisteren",en:"Listen",emoji:"👂",cat:"dagelijks",
+    note_nl:"Ala neti mi e arki nyunsu — Elke avond luister ik naar het nieuws.",
+    note_en:"Ala neti mi e arki nyunsu — Every evening I listen to the news."},
+  {srn:"Leri",nl:"Leren",en:"Learn",emoji:"📖",cat:"dagelijks",
+    note_nl:"Efu yu wani abra, yu mu leri yu les — Als je over wilt gaan, moet je je lessen leren.",
+    note_en:"Efu yu wani abra, yu mu leri yu les — If you want to pass, you must study your lessons."},
+  {srn:"Buku",nl:"Boek",en:"Book",emoji:"📚",cat:"dagelijks",
+    note_nl:"Mi gi yu a buku — Ik gaf je het boek.",
+    note_en:"Mi gi yu a buku — I gave you the book."},
+  {srn:"Oso",nl:"Huis",en:"House",emoji:"🏠",cat:"dagelijks",
+    note_nl:"A oso de bigi — Het huis is groot.",
+    note_en:"A oso de bigi — The house is big."},
+];
+
+const words=JSON.parse(JSON.stringify(DEFAULT_WORDS));
+
+
+function shuffle(a){return [...a].sort(()=>Math.random()-0.5);}
+
+/* ─── FLASHCARDS ─── */
+let fcCat='alle',fcList=[...words],fcIdx=0,fcFlipped=false;
+function getFcList(){return fcCat==='alle'?[...words]:words.filter(w=>w.cat===fcCat);}
+function renderFC(){
+  const w=fcList[fcIdx];
+  document.getElementById('fcCatL').textContent=w.cat;
+  document.getElementById('fcCatLB').textContent=w.cat;
+  document.getElementById('fcNo').textContent=`${fcIdx+1}/${fcList.length}`;
+  document.getElementById('fcCtr').textContent=`${fcIdx+1} / ${fcList.length}`;
+  document.getElementById('fcEmoji').textContent=w.emoji;
+  document.getElementById('fcEmojiB').textContent=w.emoji;
+  document.getElementById('fcSrn').textContent=w.srn;
+  document.getElementById('fcNl').textContent=w.nl;
+  document.getElementById('fcEn').textContent=w.en;
+  document.getElementById('fcNote').textContent=targetNote(w);
+  document.getElementById('fcCard').classList.remove('flipped');
+  fcFlipped=false;
+}
+document.getElementById('fcCard').addEventListener('click',(e)=>{
+  if(e.target.isContentEditable)return;
+  fcFlipped=!fcFlipped;
+  document.getElementById('fcCard').classList.toggle('flipped',fcFlipped);
+});
+document.getElementById('fcNext').addEventListener('click',()=>{fcIdx=(fcIdx+1)%fcList.length;renderFC();});
+document.getElementById('fcPrev').addEventListener('click',()=>{fcIdx=(fcIdx-1+fcList.length)%fcList.length;renderFC();});
+document.querySelectorAll('.pill-btn-xs[data-cat]').forEach(p=>{
+  p.addEventListener('click',()=>{
+    document.querySelectorAll('.pill-btn-xs[data-cat]').forEach(x=>x.classList.remove('is-active'));
+    p.classList.add('is-active');
+    fcCat=p.dataset.cat;fcList=getFcList();fcIdx=0;renderFC();
+  });
+});
+
+/* ─── MATCH ─── */
+let mSel=null,mMatched=0;
+function startMatch(){
+  mSel=null;mMatched=0;
+  const pool=shuffle(words).slice(0,6);
+  document.getElementById('matchStat').textContent=`${t('match_found')}: 0 / 6`;
+  const items=shuffle([
+    ...pool.map((w,i)=>({id:i,type:'srn',text:w.srn})),
+    ...pool.map((w,i)=>({id:i,type:'trg',text:targetWord(w)}))
+  ]);
+  const g=document.getElementById('matchGrid');g.innerHTML='';
+  items.forEach(item=>{
+    const c=document.createElement('div');
+    c.className='m-card'+(item.type==='srn'?' srn':'');
+    c.textContent=item.text;
+    c.addEventListener('click',()=>{
+      if(c.classList.contains('ok')||c.classList.contains('sel'))return;
+      if(!mSel){c.classList.add('sel');mSel={c,item};}
+      else{
+        const p=mSel;
+        if(p.item.id===item.id&&p.item.type!==item.type){
+          c.classList.add('ok');p.c.classList.remove('sel');p.c.classList.add('ok');
+          mMatched++;document.getElementById('matchStat').textContent=`${t('match_found')}: ${mMatched} / 6`;
+          mSel=null;recordCorrect();
+        } else {
+          c.classList.add('wrong');p.c.classList.add('wrong');
+          recordWrong();
+          setTimeout(()=>{c.classList.remove('wrong','sel');p.c.classList.remove('wrong','sel');mSel=null;},700);
+        }
+      }
+    });
+    g.appendChild(c);
+  });
+}
+document.getElementById('newMatch').addEventListener('click',startMatch);
+
+/* ─── QUIZ ─── */
+let qIdx=0,qAns=false,qRes=[],qQs=[];
+const QLEN=8;
+function genQuiz(){
+  qQs=[];
+  shuffle(words).slice(0,QLEN).forEach(w=>{
+    const tw=targetWord(w);
+    const d=shuffle(words.filter(x=>targetWord(x)!==tw)).slice(0,3).map(x=>targetWord(x));
+    qQs.push({srn:w.srn,emoji:w.emoji,correct:tw,opts:shuffle([tw,...d])});
+  });
+  qIdx=0;qRes=[];renderQuiz();
+}
+function renderQuiz(){
+  qAns=false;
+  const q=qQs[qIdx];
+  document.getElementById('qWord').textContent=`${q.emoji}  ${q.srn}`;
+  document.getElementById('qFb').textContent='';
+  document.getElementById('qFb').className='q-fb';
+  const od=document.getElementById('qOpts');od.innerHTML='';
+  q.opts.forEach(opt=>{
+    const b=document.createElement('button');b.className='q-opt';b.textContent=opt;
+    b.addEventListener('click',()=>{
+      if(qAns)return;qAns=true;
+      od.querySelectorAll('.q-opt').forEach(x=>x.classList.add('dis'));
+      if(opt===q.correct){
+        b.classList.add('correct');b.classList.remove('dis');
+        document.getElementById('qFb').textContent=t('quiz_correct');
+        document.getElementById('qFb').className='q-fb good';qRes.push('c');
+        recordCorrect();
+      } else {
+        b.classList.add('wrong');
+        document.getElementById('qFb').textContent=`${t('quiz_wrong')}: ${q.correct}`;
+        document.getElementById('qFb').className='q-fb bad';
+        recordWrong();
+        od.querySelectorAll('.q-opt').forEach(x=>{if(x.textContent===q.correct){x.classList.add('correct');x.classList.remove('dis');}});
+        qRes.push('w');
+      }
+      renderQDots();
+    });
+    od.appendChild(b);
+  });
+  renderQDots();
+}
+function renderQDots(){
+  const p=document.getElementById('qDots');p.innerHTML='';
+  for(let i=0;i<QLEN;i++){
+    const d=document.createElement('div');d.className='q-dot';
+    if(i<qRes.length)d.classList.add(qRes[i]==='c'?'c':'w');
+    p.appendChild(d);
+  }
+}
+document.getElementById('nextQ').addEventListener('click',()=>{
+  if(qIdx<QLEN-1){qIdx++;renderQuiz();}else{genQuiz();}
+});
+
+/* ─── LISTEN ─── */
+let lScore=0,lAns=false;
+function renderListen(){
+  lAns=false;
+  const pool=shuffle(words);const tgt=pool[0];
+  const opts=shuffle([tgt,...pool.slice(1,3)]);
+  document.getElementById('lWord').textContent=tgt.srn;
+  document.getElementById('lEmoji').textContent='❓';
+  document.getElementById('lScr').textContent=`${t('score')}: ${lScore}`;
+  const g=document.getElementById('cGrid');g.innerHTML='';
+  opts.forEach(opt=>{
+    const b=document.createElement('button');b.className='c-btn';
+    b.innerHTML=`${opt.emoji}<span>${targetWord(opt)}</span>`;
+    b.addEventListener('click',()=>{
+      if(lAns)return;lAns=true;
+      if(opt.srn===tgt.srn){b.classList.add('ok');lScore++;document.getElementById('lEmoji').textContent=tgt.emoji;document.getElementById('lScr').textContent=`${t('score')}: ${lScore}`;recordCorrect();}
+      else{b.classList.add('no');document.getElementById('lEmoji').textContent=tgt.emoji;recordWrong();}
+      setTimeout(renderListen,1300);
+    });
+    g.appendChild(b);
+  });
+}
+
+/* ─── INVUL ─── */
+const ILEN=10;
+let iQs=[],iIdx=0,iRes=[],iScore=0,iAnswer=[],iBank=[],iUsed=[];
+function startInvul(){iQs=shuffle(words).slice(0,ILEN);iIdx=0;iRes=[];iScore=0;renderInvul();}
+function renderInvul(){
+  const w=iQs[iIdx];
+  document.getElementById('invEmoji').textContent=w.emoji;
+  document.getElementById('invClue').textContent=targetWord(w);
+  const nt=targetNote(w);document.getElementById('invEx').textContent=nt?`"${nt.split('.')[0]}."`:`${w.cat}`;
+  document.getElementById('invBadge').textContent=`${t('score_label')}: ${iScore} / ${ILEN}`;
+  document.getElementById('invRnd').textContent=`${iIdx+1} ${t('of')} ${ILEN}`;
+  document.getElementById('invFb').textContent='';document.getElementById('invFb').className='inv-fb';
+  const letters=w.srn.toUpperCase().split('');
+  const extra=shuffle('ABCDEFGHIJKLMNOPRSTUW'.split('')).filter(l=>!letters.includes(l)).slice(0,4);
+  iBank=shuffle([...letters,...extra]);
+  iUsed=new Array(iBank.length).fill(false);
+  iAnswer=new Array(letters.length).fill('');
+  renderBlanks(w);renderBank();renderIProg();
+}
+function renderBlanks(w){
+  const d=document.getElementById('invBlanks');d.innerHTML='';
+  w.srn.toUpperCase().split('').forEach((_,i)=>{
+    const b=document.createElement('div');b.className='blank';
+    b.textContent=iAnswer[i]||'';
+    b.addEventListener('click',()=>{
+      if(!iAnswer[i])return;
+      const l=iAnswer[i];iAnswer[i]='';
+      const bi=iUsed.findIndex((u,j)=>u&&iBank[j]===l);
+      if(bi>=0)iUsed[bi]=false;
+      renderBlanks(iQs[iIdx]);renderBank();
+    });
+    d.appendChild(b);
+  });
+}
+function renderBank(){
+  const d=document.getElementById('invBank');d.innerHTML='';
+  iBank.forEach((l,bi)=>{
+    const t=document.createElement('div');t.className='tile'+(iUsed[bi]?' used':'');
+    t.textContent=l;
+    t.addEventListener('click',()=>{
+      if(iUsed[bi])return;
+      const ei=iAnswer.indexOf('');if(ei===-1)return;
+      iAnswer[ei]=l;iUsed[bi]=true;
+      renderBlanks(iQs[iIdx]);renderBank();
+    });
+    d.appendChild(t);
+  });
+}
+function renderIProg(){
+  const r=document.getElementById('invProg');r.innerHTML='';
+  for(let i=0;i<ILEN;i++){
+    const d=document.createElement('div');d.className='ip';
+    if(i<iRes.length)d.classList.add(iRes[i]==='c'?'g':'b');
+    r.appendChild(d);
+  }
+}
+document.getElementById('invCheck').addEventListener('click',()=>{
+  const w=iQs[iIdx];const tgt=w.srn.toUpperCase().split('');
+  const ok=iAnswer.join('')===tgt.join('');
+  document.getElementById('invBlanks').querySelectorAll('.blank').forEach((b,i)=>{
+    b.classList.remove('ok','no');
+    if(iAnswer[i]===tgt[i])b.classList.add('ok');
+    else if(iAnswer[i])b.classList.add('no');
+  });
+  const fb=document.getElementById('invFb');
+  if(ok){fb.textContent=t('inv_correct');fb.className='inv-fb good';iScore++;iRes.push('c');recordCorrect();}
+  else{fb.textContent=`${t('inv_wrong')}: ${w.srn}`;fb.className='inv-fb bad';iRes.push('w');recordWrong();}
+  document.getElementById('invBadge').textContent=`${t('score_label')}: ${iScore} / ${ILEN}`;
+  renderIProg();
+});
+document.getElementById('invReset').addEventListener('click',()=>{
+  const w=iQs[iIdx];iAnswer=new Array(w.srn.length).fill('');iUsed=new Array(iBank.length).fill(false);
+  renderBlanks(w);renderBank();document.getElementById('invFb').textContent='';
+});
+document.getElementById('invNext').addEventListener('click',()=>{
+  if(iIdx<ILEN-1){if(iRes.length<=iIdx)iRes.push('s');iIdx++;renderInvul();}else{startInvul();}
+});
+
+/* ─── TABS ─── */
+document.querySelectorAll('[data-tab]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const tab=btn.dataset.tab;
+    document.querySelectorAll('[data-tab]').forEach(b=>b.classList.remove('is-active'));
+    document.querySelectorAll('[data-tab="'+tab+'"]').forEach(b=>b.classList.add('is-active'));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('section-'+tab).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+
+/* ─── LANG SWITCH ─── */
+document.querySelectorAll('.lang-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    if(b.dataset.lang===lang)return;
+    lang=b.dataset.lang;
+    try{localStorage.setItem(LANG_KEY,lang);}catch(e){}
+    applyI18n();
+    renderFC();startMatch();genQuiz();renderListen();renderInvul();
+  });
+});
+
+/* ─── GAME OVER restart ─── */
+document.getElementById('goBtn').addEventListener('click',hideGameOver);
+
+applyI18n();
+renderStats();
+renderFC();startMatch();genQuiz();renderListen();startInvul();
+</script>
+</body>
+</html>
