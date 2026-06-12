@@ -43,7 +43,9 @@ body{
   -webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;
   font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 40;
   user-select:none;
+  visibility:hidden; /* pas zichtbaar als het lettertype klaar is — voorkomt flits van ruwe icoonnamen op mobiel */
 }
+html.fonts-ready .mat-icon{visibility:visible;}
 .mat-icon.outlined{font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 24;}
 
 /* Woord-icoontje wrapper voor flashcard/listen/invul */
@@ -435,15 +437,15 @@ body{
 }
 .c-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
 .c-btn{
-  padding:20px 10px;border-radius:18px;
+  padding:20px 12px;border-radius:18px;
   border:2px solid rgba(247,242,232,0.18);
   background:rgba(26,58,30,0.3);
-  font-size:44px;cursor:pointer;transition:all 0.12s;text-align:center;
+  cursor:pointer;transition:all 0.12s;text-align:center;
   box-shadow:0 4px 0 0 rgba(0,0,0,0.3);
-  color:var(--gold-light);line-height:1;
+  line-height:1;
 }
-.c-btn .mat-icon{font-variation-settings:'FILL' 1,'wght' 500,'opsz' 40;}
-.c-btn>span{display:block;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;letter-spacing:0.5px;color:rgba(247,242,232,0.7);margin-top:8px;}
+.c-btn .c-cat{display:block;font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);opacity:0.8;margin-bottom:8px;}
+.c-btn .c-word{display:block;font-family:'Nunito',sans-serif;font-size:19px;font-weight:800;letter-spacing:0.3px;color:var(--cream);}
 .c-btn:hover{border-color:rgba(247,242,232,0.4);}
 .c-btn:active{transform:translateY(2px);box-shadow:0 2px 0 0 rgba(0,0,0,0.3);}
 .c-btn.ok{border-color:var(--leaf);background:rgba(74,140,82,0.3);box-shadow:0 4px 0 0 #2d5a34;}
@@ -726,6 +728,12 @@ body.lang-en [data-trans-lang="nl"]{display:none !important;}
 </nav>
 
 <script>
+// ─── Toon Material-iconen pas als het lettertype geladen is (mobiel: voorkomt ruwe namen als "bedtime"/"pets") ───
+(function(){
+  var reveal=function(){document.documentElement.classList.add('fonts-ready');};
+  if(document.fonts&&document.fonts.ready){document.fonts.ready.then(reveal);setTimeout(reveal,3500);}
+  else{reveal();}
+})();
 // ═══════════════════════════════════════════════════════════════
 // I18N — Nederlandse en Engelse interface
 // ═══════════════════════════════════════════════════════════════
@@ -1110,7 +1118,7 @@ function genQuiz(){
 function renderQuiz(){
   qAns=false;
   const q=qQs[qIdx];
-  document.getElementById('qWord').textContent=`${q.emoji}  ${q.srn}`;
+  document.getElementById('qWord').textContent=q.srn;
   document.getElementById('qFb').textContent='';
   document.getElementById('qFb').className='q-fb';
   const od=document.getElementById('qOpts');od.innerHTML='';
@@ -1161,12 +1169,19 @@ function renderListen(){
   document.getElementById('lScr').textContent=`${t('score')}: ${lScore}`;
   const g=document.getElementById('cGrid');g.innerHTML='';
   opts.forEach(opt=>{
-    const b=document.createElement('button');b.className='c-btn';
-    b.innerHTML=`${renderWordIcon(opt)}<span>${targetWord(opt)}</span>`;
+    const b=document.createElement('button');b.className='c-btn';b.dataset.srn=opt.srn;
+    b.innerHTML=`<span class="c-cat">${t('cat_'+opt.cat)}</span><span class="c-word">${targetWord(opt)}</span>`;
     b.addEventListener('click',()=>{
       if(lAns)return;lAns=true;
-      if(opt.srn===tgt.srn){b.classList.add('ok');lScore++;document.getElementById('lEmoji').innerHTML=renderWordIcon(tgt);document.getElementById('lScr').textContent=`${t('score')}: ${lScore}`;recordCorrect();}
-      else{b.classList.add('no');document.getElementById('lEmoji').innerHTML=renderWordIcon(tgt);recordWrong();}
+      if(opt.srn===tgt.srn){
+        b.classList.add('ok');lScore++;
+        document.getElementById('lEmoji').innerHTML=renderWordIcon(tgt); // illustratie pas onthullen bij een goed antwoord
+        document.getElementById('lScr').textContent=`${t('score')}: ${lScore}`;recordCorrect();
+      } else {
+        b.classList.add('no');
+        const ok=g.querySelector(`[data-srn="${tgt.srn}"]`);if(ok)ok.classList.add('ok'); // markeer het juiste antwoord, illustratie blijft verborgen
+        recordWrong();
+      }
       setTimeout(renderListen,1300);
     });
     g.appendChild(b);
